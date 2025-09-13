@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>期中考全隊</title>
+  <style>
+    html { 
+      font-family: Helvetica; 
+      display: inline-block; 
+      margin: 0px auto; 
+      text-align: center;
+    }
+    h1 { color: #2c3e50; }
+    .button { 
+      background-color: #4CAF50; 
+      border: none; 
+      color: white; 
+      padding: 16px 40px; 
+      text-decoration: none; 
+      font-size: 20px; 
+      margin: 2px; 
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .button2 { background-color: #555555; }
+    .wrap {
+      width: 100%; 
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .left, .right {
+      width: 48%; 
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .left2 { width: 34%; }
+    .right2 { width: 66%; }
+    img { border: 1px solid #ddd; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h1>綠色健身房監控系統</h1>
+  <h1>備用電量 <span id="power">85</span> %</h1>
+
+  <!-- 輸入資訊 -->
+  <div class="wrap">
+    <div class="left">
+      <h2>輸入</h2>
+      <p><button id="inputBtn" class="button button2">OFF</button></p>
+    </div>
+
+    <div class="right">
+      <h2>電池狀態</h2>
+      <div class="wrap">
+        <div class="left">
+          <h4>電池一</h4>
+          <h4>電池二</h4>
+          <h4>電池三</h4>
+        </div>
+        <div class="right">
+          <h4><span id="in1">3.5</span> V</h4>
+          <h4><span id="in2">3.6</span> V</h4>
+          <h4><span id="in3">3.7</span> V</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 輸出資訊 -->
+  <div class="wrap">
+    <div class="left">
+      <h2>輸出，消耗: <span id="in7">0.0</span> mW</h2>
+      <img id="deviceImage" src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/底圖.png" 
+           width="100%" height="100%" alt="設備狀態圖">
+    </div>
+
+    <div class="right">
+      <h2>設備</h2>
+      <div class="wrap">
+        <div class="left">
+          <p><button id="btn1" class="button2">設備一OFF</button></p>
+          <p><button id="btn2" class="button2">設備二OFF</button></p>
+          <p><button id="btn3" class="button2">設備三OFF</button></p>
+        </div>
+        <div class="right">
+          <h4><span id="out1">0</span> mW</h4>
+          <h4><span id="out2">0</span> mW</h4>
+          <h4><span id="out3">0</span> mW</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模擬 Arduino 狀態
+    let output33State = "off";
+    let output34State = "off";
+    let output35State = "off";
+
+    const deviceImage = document.getElementById("deviceImage");
+    const in7Span = document.getElementById("in7");
+    const out1Span = document.getElementById("out1");
+    const out2Span = document.getElementById("out2");
+    const out3Span = document.getElementById("out3");
+
+    // 三個設備的耗能
+    const in_4 = 56.4;
+    const in_5 = 37.3;
+    const in_6 = 23.2;
+
+    // 更新設備圖片
+    function updateImage() {
+      if(output33State==="on" && output34State==="off" && output35State==="off"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備一.png";
+      }
+      else if(output33State==="on" && output34State==="on" && output35State==="off"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備一二.png";
+      }
+      else if(output33State==="on" && output34State==="on" && output35State==="on"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備一二燈.png";
+      }
+      else if(output33State==="off" && output34State==="on" && output35State==="off"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備二.png";
+      }
+      else if(output33State==="off" && output34State==="off" && output35State==="on"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/燈.png";
+      }
+      else if(output33State==="on" && output34State==="off" && output35State==="on"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備一燈.png";
+      }
+      else if(output33State==="off" && output34State==="on" && output35State==="on"){
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/設備二燈.png";
+      }
+      else{
+        deviceImage.src="https://raw.githubusercontent.com/Liweizhe0411/0427_pic/main/底圖.png";
+      }
+    }
+
+    // 更新消耗數據
+    function updatePower() {
+      let total = 0;
+      out1Span.textContent = (output33State==="on") ? in_4 : 0;
+      out2Span.textContent = (output34State==="on") ? in_5 : 0;
+      out3Span.textContent = (output35State==="on") ? in_6 : 0;
+      total += parseFloat(out1Span.textContent);
+      total += parseFloat(out2Span.textContent);
+      total += parseFloat(out3Span.textContent);
+      in7Span.textContent = total.toFixed(1);
+    }
+
+    // 綁定按鈕
+    document.getElementById("btn1").addEventListener("click", () => {
+      output33State = (output33State==="on") ? "off" : "on";
+      document.getElementById("btn1").textContent = 
+        (output33State==="on") ? "設備一ON" : "設備一OFF";
+      updateImage();
+      updatePower();
+    });
+
+    document.getElementById("btn2").addEventListener("click", () => {
+      output34State = (output34State==="on") ? "off" : "on";
+      document.getElementById("btn2").textContent = 
+        (output34State==="on") ? "設備二ON" : "設備二OFF";
+      updateImage();
+      updatePower();
+    });
+
+    document.getElementById("btn3").addEventListener("click", () => {
+      output35State = (output35State==="on") ? "off" : "on";
+      document.getElementById("btn3").textContent = 
+        (output35State==="on") ? "設備三ON" : "設備三OFF";
+      updateImage();
+      updatePower();
+    });
+
+    // 初始化
+    updateImage();
+    updatePower();
+  </script>
+</body>
+</html>
